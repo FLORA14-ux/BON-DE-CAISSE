@@ -13,14 +13,26 @@ return new class extends Migration
     {
         Schema::create('alertes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
+            $table->foreignId('document_id')->constrained('documents');
             $table->enum('type_alerte', ['regularisation_retard', 'document_non_signe', 'autre']);
-            $table->string('titre', 200);
+            
+            // Contenu de l'alerte
+            $table->string('titre');
             $table->text('message');
             $table->enum('niveau', ['info', 'warning', 'error'])->default('warning');
+            
+            // Statut
             $table->enum('statut', ['active', 'resolue', 'ignoree'])->default('active');
-            $table->datetime('date_resolution')->nullable();
+            $table->timestamp('date_resolution')->nullable();
+            
+            // Timestamps
+            $table->timestamp('date_creation')->useCurrent();
+            $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();
+            
+            // Index pour améliorer les performances
+            $table->index(['document_id', 'statut']);
+            $table->index(['type_alerte', 'statut']);
         });
     }
 

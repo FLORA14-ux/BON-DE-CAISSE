@@ -13,14 +13,16 @@ return new class extends Migration
     {
         Schema::create('demandeurs', function (Blueprint $table) {
             $table->id();
-            $table->string('nom', 100);
-            $table->string('prenom', 100);
-            $table->string('matricule', 50)->unique()->nullable();
-            $table->string('service', 100)->nullable();
-            $table->string('poste', 100)->nullable();
-            $table->string('telephone', 30)->nullable();
-            $table->string('email', 150)->unique()->nullable();
+            $table->string('nom');
+            $table->string('prenom');
+            $table->string('matricule')->unique();
+            $table->string('service');
+            $table->string('poste');
+            $table->string('telephone')->nullable();
+            $table->string('email')->nullable();
             $table->enum('statut', ['actif', 'inactif'])->default('actif');
+            $table->timestamp('date_creation')->useCurrent();
+            $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();
         });
     }

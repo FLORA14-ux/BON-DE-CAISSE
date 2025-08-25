@@ -16,9 +16,10 @@ return new class extends Migration
             $table->enum('type_document', ['bon_menues_depenses', 'lettre_commande', 'fiche_depenses']);
             $table->year('annee');
             $table->integer('compteur')->default(0);
-            // Contrainte unique sur type_document + annee
-            $table->unique(['type_document', 'annee'], 'idx_type_annee');
             $table->timestamps();
+            
+            // Contrainte unique sur type_document et annee
+            $table->unique(['type_document', 'annee'], 'unique_type_annee');
         });
     }
 
@@ -28,14 +29,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('compteurs');
-        Schema::dropIfExists('audit_trails');
-        Schema::dropIfExists('alertes');
-        Schema::dropIfExists('pdf_archives');
-        Schema::dropIfExists('fiche_depenses');
-        Schema::dropIfExists('documents');
-        Schema::dropIfExists('demandeurs');
-        Schema::dropIfExists('users');
-
-
     }
 };

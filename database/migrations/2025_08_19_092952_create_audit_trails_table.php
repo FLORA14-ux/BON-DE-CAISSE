@@ -11,17 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('audit_trails', function (Blueprint $table) {
+        Schema::create('audit_trail', function (Blueprint $table) {
             $table->id();
-            $table->string('table_concernee', 50);
-            $table->integer('enregistrement_id');
+            $table->string('table_concernee');
+            $table->unsignedBigInteger('enregistrement_id');
             $table->enum('action', ['creation', 'modification', 'suppression', 'consultation']);
-            $table->string('champ_modifie', 100)->nullable();
+            
+            // Détails de l'action
+            $table->string('champ_modifie')->nullable();
             $table->text('ancienne_valeur')->nullable();
             $table->text('nouvelle_valeur')->nullable();
             $table->text('description')->nullable();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // Utilisateur et contexte
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('adresse_ip')->nullable();
+            $table->text('user_agent')->nullable();
+            
+            // Timestamp
+            $table->timestamp('date_action')->useCurrent();
             $table->timestamps();
+            
+            // Index pour améliorer les performances de recherche
+            $table->index(['table_concernee', 'enregistrement_id']);
+            $table->index(['user_id', 'date_action']);
         });
     }
 
@@ -30,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('audit_trails');
+        Schema::dropIfExists('audit_trail');
     }
 };

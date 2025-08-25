@@ -13,27 +13,37 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->string('numero', 50)->unique();
+            $table->string('numero')->unique();
             $table->enum('type_document', ['bon_menues_depenses', 'lettre_commande']);
-            $table->string('fournisseur', 200);
+            $table->foreignId('demandeur_id')->constrained('demandeurs');
+            
+            // Informations de la facture proforma
+            $table->string('fournisseur');
             $table->text('objet_achat');
-            $table->decimal('montant', 15, 2);
-            $table->string('facture_proforma_numero', 100)->nullable();
-            $table->string('facture_definitive_numero', 100)->nullable();
-            $table->decimal('montant_reel', 15, 2)->nullable();
-            $table->decimal('ecart_montant', 15, 2)->nullable();
+            $table->decimal('montant_fcfa', 12, 2);
+            $table->string('facture_proforma_numero')->nullable();
+            
+            // Statuts et dates
             $table->enum('statut', ['cree', 'en_signature', 'signe', 'fonds_retires', 'regularise', 'annule'])->default('cree');
-            $table->datetime('date_signature')->nullable();
-            $table->datetime('date_retrait_fonds')->nullable();
-            $table->datetime('date_regularisation')->nullable();
-            $table->integer('delai_regularisation_jours')->default(30);
+            $table->timestamp('date_creation')->useCurrent();
+            $table->timestamp('date_signature')->nullable();
+            $table->timestamp('date_retrait_fonds')->nullable();
+            $table->timestamp('date_regularisation')->nullable();
+            
+            // Informations de régularisation
+            $table->string('facture_definitive_numero')->nullable();
+            $table->decimal('montant_reel', 12, 2)->nullable();
+            
+            // Suivi des délais
+            $table->integer('delai_regularisation_jours')->nullable();
             $table->boolean('alerte_envoyee')->default(false);
-            $table->foreignId('demandeur_id')->constrained('demandeurs')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('adresse_ip', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->timestamp('date_action')->useCurrent();
-
+            
+            // Utilisateur qui a créé le document
+            $table->foreignId('created_by')->constrained('users');
+            
+            // Timestamp de modification
+            $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
         });
     }
 

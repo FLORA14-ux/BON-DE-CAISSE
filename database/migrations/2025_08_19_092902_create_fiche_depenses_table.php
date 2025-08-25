@@ -11,29 +11,41 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fiche_depenses', function (Blueprint $table) {
+        Schema::create('fiches_depenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
-            $table->string('numero_fiche', 50)->unique();
-            $table->decimal('montant_reel', 15, 2);
-            $table->decimal('difference', 15, 2)->default(0);
+            $table->foreignId('document_id')->constrained('documents');
+            $table->string('numero_fiche')->unique();
+            
+            // Informations de la fiche
+            $table->decimal('montant_reel', 12, 2);
+            $table->decimal('difference', 12, 2)->nullable();
             $table->text('observations')->nullable();
-            // Signatures (statuts)
+            
+            // Signatures requises (statut de chaque signature)
             $table->boolean('signature_etabli')->default(false);
             $table->boolean('signature_visa_controle')->default(false);
             $table->boolean('signature_visa_chef_financier')->default(false);
             $table->boolean('signature_directeur_financier')->default(false);
             $table->boolean('signature_beneficiaire')->default(false);
             $table->boolean('signature_caissier')->default(false);
+            
             // Dates des signatures
-            $table->datetime('date_signature_etabli')->nullable();
-            $table->datetime('date_signature_visa_controle')->nullable();
-            $table->datetime('date_signature_visa_chef_financier')->nullable();
-            $table->datetime('date_signature_directeur_financier')->nullable();
-            $table->datetime('date_signature_beneficiaire')->nullable();
-            $table->datetime('date_signature_caissier')->nullable();
+            $table->timestamp('date_signature_etabli')->nullable();
+            $table->timestamp('date_signature_visa_controle')->nullable();
+            $table->timestamp('date_signature_visa_chef_financier')->nullable();
+            $table->timestamp('date_signature_directeur_financier')->nullable();
+            $table->timestamp('date_signature_beneficiaire')->nullable();
+            $table->timestamp('date_signature_caissier')->nullable();
+            
+            // Statut global de la fiche
             $table->enum('statut', ['cree', 'en_signature', 'complete'])->default('cree');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // Utilisateur qui a créé la fiche
+            $table->foreignId('created_by')->constrained('users');
+            
+            // Timestamps
+            $table->timestamp('date_creation')->useCurrent();
+            $table->timestamp('date_modification')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();
         });
     }
@@ -43,6 +55,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fiche_depenses');
+        Schema::dropIfExists('fiches_depenses');
     }
 };
